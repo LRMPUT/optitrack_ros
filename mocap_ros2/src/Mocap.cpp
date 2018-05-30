@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <iostream>
 
 #include "NatNetLinux/NatNet.h"
 
@@ -49,7 +50,7 @@ Mocap::Mocap(int argc, char **argv) {
     readOpts(argc, argv);
 
     //NatNet
-    mocapFrameValid = false;
+    lastMocapFrameValid = false;
 
     // Set addresses
     readOpts(argc, argv);
@@ -93,9 +94,9 @@ Mocap::~Mocap() {
 }
 
 bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient) {
-    MocapFrame mocapFrame(frameListener->pop(&mocapFrameValid).first);
+    MocapFrame mocapFrame(frameListener->pop(&lastMocapFrameValid).first);
 
-    if (mocapFrameValid) {
+    if (lastMocapFrameValid) {
 	//	cout << "Dziala" << endl;
 //        float latency;
 ////        uint32_t timecode, subframe;
@@ -117,17 +118,26 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
         retOrient.w() = rigidBodies.front().orientation().qw;
     }
 
-    return mocapFrameValid;
+    return lastMocapFrameValid;
 }
 
 bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient, int id) {
+
+    bool mocapFrameValid = false;
     MocapFrame mocapFrame(frameListener->pop(&mocapFrameValid).first);
     
-    if (mocapFrameValid) {
+    if(mocapFrameValid){
+        lastMocapFrame = mocapFrame;
+        lastMocapFrameValid = mocapFrameValid;
+    }
+    
+    if (lastMocapFrameValid) {
         
-        bool rbFound = false;
-        const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
+        bool rbValid = false;
+        const std::vector<RigidBody> &rigidBodies = lastMocapFrame.rigidBodies();
+        std::cout << "rigidBodies.size() = " << rigidBodies.size() << std::endl;
         for(const RigidBody &rb : rigidBodies) {
+            cout << "rb.id() = " << rb.id() << endl;
             if(id == rb.id()) {
                 //cout << rigidBodies.size() << endl;
                 retPos.x() = rb.location().x;
@@ -137,14 +147,14 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
                 retOrient.y() = rb.orientation().qy;
                 retOrient.z() = rb.orientation().qz;
                 retOrient.w() = rb.orientation().qw;
-                
-                rbFound = true;
+    
+                rbValid = true;
             }
         }
-        return rbFound;
+        return rbValid;
     }
     
-    return mocapFrameValid;
+    return lastMocapFrameValid;
 }
 
 void Mocap::readOpts(int argc, char **argv) {

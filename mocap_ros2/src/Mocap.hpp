@@ -61,9 +61,9 @@ private:
     std::shared_ptr<CommandListener> commandListener;
     std::shared_ptr<FrameListener> frameListener;
 
-    bool mocapFrameValid;
+    bool lastMocapFrameValid;
 
-//    MocapFrame mocapFrame;
+    MocapFrame lastMocapFrame;
 };
 
 

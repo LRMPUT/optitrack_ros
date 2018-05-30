@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     Eigen::Vector3d retPos;
     Eigen::Quaterniond retOrient;
     
-    ros::init(argc, argv, "mocap_ros2_1");
+    ros::init(argc, argv, "mocap_ros2_node");
     ros::NodeHandle n("~");
     
     int nbodies;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     int count = 0;
     while (ros::ok()) {
         for(int r = 0; r < nbodies; ++r) {
-            bool frameValid = mocap.getLatestPose(retPos, retOrient, r);
+            bool frameValid = mocap.getLatestPose(retPos, retOrient, r + 1);
             ros::Time curTimestamp = ros::Time::now();
             
             if(frameValid) {
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
                 posestamped.header.stamp = curTimestamp;
                 posestamped.header.seq = seqs[r]++;
     
-    
+                cout << "publishing" << endl;
                 rbPubs[r].publish(posestamped);
             }
         }
