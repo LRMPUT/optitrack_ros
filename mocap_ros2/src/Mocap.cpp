@@ -129,6 +129,7 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
     if(mocapFrameValid){
         lastMocapFrame = mocapFrame;
         lastMocapFrameValid = mocapFrameValid;
+        dataFetched.clear();
     }
     
     if (lastMocapFrameValid) {
@@ -138,7 +139,7 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
         std::cout << "rigidBodies.size() = " << rigidBodies.size() << std::endl;
         for(const RigidBody &rb : rigidBodies) {
             cout << "rb.id() = " << rb.id() << endl;
-            if(id == rb.id()) {
+            if(id == rb.id() && dataFetched.count(id) == 0) {
                 //cout << rigidBodies.size() << endl;
                 retPos.x() = rb.location().x;
                 retPos.y() = rb.location().y;
@@ -148,6 +149,7 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
                 retOrient.z() = rb.orientation().qz;
                 retOrient.w() = rb.orientation().qw;
     
+                dataFetched.insert(id);
                 rbValid = true;
             }
         }

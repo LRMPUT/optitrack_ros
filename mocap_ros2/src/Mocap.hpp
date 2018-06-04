@@ -64,6 +64,9 @@ private:
     bool lastMocapFrameValid;
 
     MocapFrame lastMocapFrame;
+    
+    // ids of rigid bodies for which data was fetched
+    std::set<int> dataFetched;
 };
 
 
