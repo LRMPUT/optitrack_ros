@@ -36,32 +36,32 @@ int main(int argc, char *argv[]) {
     
     int count = 0;
     while (ros::ok()) {
-        for(int r = 0; r < nbodies; ++r) {
-            bool frameValid = mocap.getLatestPose(retPos, retOrient, r + 1);
-            ros::Time curTimestamp = ros::Time::now();
+        vectorPose poses = mocap.getLatestPoses();
+        ros::Time curTimestamp = ros::Time::now();
+        
+        for(const Pose &curPose : poses){
+            int r = curPose.id - 1;
             
-            if(frameValid) {
-                geometry_msgs::Point point;
-                point.x = retPos.x();
-                point.y = retPos.y();
-                point.z = retPos.z();
-    
-                geometry_msgs::Quaternion quat;
-                quat.x = retOrient.x();
-                quat.y = retOrient.y();
-                quat.z = retOrient.z();
-                quat.w = retOrient.w();
-    
-                geometry_msgs::PoseStamped posestamped;
-                posestamped.pose.position = point;
-                posestamped.pose.orientation = quat;
-                posestamped.header.frame_id = "0";
-                posestamped.header.stamp = curTimestamp;
-                posestamped.header.seq = seqs[r]++;
-    
-                cout << "publishing" << endl;
-                rbPubs[r].publish(posestamped);
-            }
+            geometry_msgs::Point point;
+            point.x = curPose.t.x();
+            point.y = curPose.t.y();
+            point.z = curPose.t.z();
+
+            geometry_msgs::Quaternion quat;
+            quat.x = curPose.r.x();
+            quat.y = curPose.r.y();
+            quat.z = curPose.r.z();
+            quat.w = curPose.r.w();
+
+            geometry_msgs::PoseStamped posestamped;
+            posestamped.pose.position = point;
+            posestamped.pose.orientation = quat;
+            posestamped.header.frame_id = "0";
+            posestamped.header.stamp = curTimestamp;
+            posestamped.header.seq = seqs[r]++;
+
+//            cout << "publishing for " << r << endl;
+            rbPubs[r].publish(posestamped);
         }
         ros::spinOnce();
         loop_rate.sleep();

@@ -97,15 +97,6 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
     MocapFrame mocapFrame(frameListener->pop(&lastMocapFrameValid).first);
 
     if (lastMocapFrameValid) {
-	//	cout << "Dziala" << endl;
-//        float latency;
-////        uint32_t timecode, subframe;
-//        int hour, minute, second, frame, subframe;
-//            uint32_t timecode, subframe;
-//                mocapFrame.timecode(timecode, subframe);
-//        mocapFrame.timecode(hour, minute, second, frame, subframe);
-//        latency = mocapFrame.latency();
-
         const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
         // assuming only 1 rigid body
 	    //cout << rigidBodies.size() << endl;
@@ -121,42 +112,29 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
     return lastMocapFrameValid;
 }
 
-bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient, int id) {
-
-    bool mocapFrameValid = false;
-    MocapFrame mocapFrame(frameListener->pop(&mocapFrameValid).first);
+vectorPose Mocap::getLatestPoses() {
+    MocapFrame mocapFrame(frameListener->pop(&lastMocapFrameValid).first);
     
-    if(mocapFrameValid){
-        lastMocapFrame = mocapFrame;
-        lastMocapFrameValid = mocapFrameValid;
-        dataFetched.clear();
-    }
-    
+    vectorPose ret;
     if (lastMocapFrameValid) {
+
         
-        bool rbValid = false;
-        const std::vector<RigidBody> &rigidBodies = lastMocapFrame.rigidBodies();
-        std::cout << "rigidBodies.size() = " << rigidBodies.size() << std::endl;
+        const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
         for(const RigidBody &rb : rigidBodies) {
-            cout << "rb.id() = " << rb.id() << endl;
-            if(id == rb.id() && dataFetched.count(id) == 0) {
-                //cout << rigidBodies.size() << endl;
-                retPos.x() = rb.location().x;
-                retPos.y() = rb.location().y;
-                retPos.z() = rb.location().z;
-                retOrient.x() = rb.orientation().qx;
-                retOrient.y() = rb.orientation().qy;
-                retOrient.z() = rb.orientation().qz;
-                retOrient.w() = rb.orientation().qw;
-    
-                dataFetched.insert(id);
-                rbValid = true;
-            }
+            Eigen::Vector3d t;
+            Eigen::Quaterniond r;
+            t.x() = rb.location().x;
+            t.y() = rb.location().y;
+            t.z() = rb.location().z;
+            r.x() = rb.orientation().qx;
+            r.y() = rb.orientation().qy;
+            r.z() = rb.orientation().qz;
+            r.w() = rb.orientation().qw;
+            
+            ret.emplace_back(rb.id(), t, r);
         }
-        return rbValid;
     }
-    
-    return lastMocapFrameValid;
+    return ret;
 }
 
 void Mocap::readOpts(int argc, char **argv) {
@@ -185,3 +163,5 @@ void Mocap::readOpts(int argc, char **argv) {
     localAddress = inet_addr( vm["local-addr"].as<std::string>().c_str() );
     serverAddress = inet_addr( vm["server-addr"].as<std::string>().c_str() );
 }
+
+

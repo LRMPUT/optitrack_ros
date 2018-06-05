@@ -275,6 +275,7 @@ int main(int argc, char **argv) {
       imu.enableFilterStream(true);
 
       ROS_INFO("Enabling filter measurements");
+      ROS_INFO("enableAccelUpdate = %d, enableMagUpdate = %d", enableAccelUpdate, enableMagUpdate);
       imu.enableMeasurements(enableAccelUpdate, enableMagUpdate);
 
       ROS_INFO("Enabling gyro bias estimation");

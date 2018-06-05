@@ -26,11 +26,29 @@
 
 #include <Eigen/Eigen>
 //#include <eigen3/Eigen/Dense>
+#include<Eigen/StdVector>
+
 #include <memory>
 #include <iostream>
+#include <vector>
 
 #include "NatNetLinux/CommandListener.h"
 #include "NatNetLinux/FrameListener.h"
+
+struct Pose{
+    Pose() {}
+    
+    Pose(int id, Eigen::Vector3d &t, Eigen::Quaterniond &r) : id(id), t(t), r(r) {}
+    
+    int id;
+    
+    Eigen::Vector3d t;
+    Eigen::Quaterniond r;
+    
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+typedef std::vector<Pose, Eigen::aligned_allocator<Pose> > vectorPose;
 
 class Mocap {
 public:
@@ -41,9 +59,7 @@ public:
     bool getLatestPose(Eigen::Vector3d& retPos,
                         Eigen::Quaterniond& retOrient);
     
-    bool getLatestPose(Eigen::Vector3d& retPos,
-                       Eigen::Quaterniond& retOrient,
-                       int id);
+    vectorPose getLatestPoses();
 private:
     void readOpts(int argc, char* argv[]);
 
@@ -63,10 +79,7 @@ private:
 
     bool lastMocapFrameValid;
 
-    MocapFrame lastMocapFrame;
-    
-    // ids of rigid bodies for which data was fetched
-    std::set<int> dataFetched;
+//    MocapFrame lastMocapFrame;
 };
 
 
