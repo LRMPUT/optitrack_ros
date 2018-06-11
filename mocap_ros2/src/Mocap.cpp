@@ -121,17 +121,19 @@ vectorPose Mocap::getLatestPoses() {
         
         const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
         for(const RigidBody &rb : rigidBodies) {
-            Eigen::Vector3d t;
-            Eigen::Quaterniond r;
-            t.x() = rb.location().x;
-            t.y() = rb.location().y;
-            t.z() = rb.location().z;
-            r.x() = rb.orientation().qx;
-            r.y() = rb.orientation().qy;
-            r.z() = rb.orientation().qz;
-            r.w() = rb.orientation().qw;
-            
-            ret.emplace_back(rb.id(), t, r);
+            if(rb.trackingValid()) {
+                Eigen::Vector3d t;
+                Eigen::Quaterniond r;
+                t.x() = rb.location().x;
+                t.y() = rb.location().y;
+                t.z() = rb.location().z;
+                r.x() = rb.orientation().qx;
+                r.y() = rb.orientation().qy;
+                r.z() = rb.orientation().qz;
+                r.w() = rb.orientation().qw;
+    
+                ret.emplace_back(rb.id(), t, r);
+            }
         }
     }
     return ret;

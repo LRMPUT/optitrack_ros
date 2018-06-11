@@ -1,6 +1,6 @@
 <launch>
 
-	<node name = "mocap_node" type="mocap_ros2" pkg="mocap_ros2" args = "-l 192.168.100.105 -s 192.168.100.100" output="screen" >
+	<node name = "mocap_node" type="mocap_ros2" pkg="mocap_ros2" args = "-l 192.168.100.106 -s 192.168.100.101" output="screen" >
 		<param name="nbodies" value="2" />
 	</node>
 	<!--<include file = "$/home/wojciech/optiTrack/src/imu_3dm_gx4-master/launch/imu.launch"/>-->
