@@ -132,7 +132,7 @@ vectorPose Mocap::getLatestPoses() {
                 r.z() = rb.orientation().qz;
                 r.w() = rb.orientation().qw;
     
-                ret.emplace_back(rb.id(), t, r);
+                ret.emplace_back(rb.id(), t, r, mocapFrame.cameraMidExposureTimestamp());
             }
         }
     }

@@ -38,12 +38,20 @@
 struct Pose{
     Pose() {}
     
-    Pose(int id, Eigen::Vector3d &t, Eigen::Quaterniond &r) : id(id), t(t), r(r) {}
+    Pose(int id, const Eigen::Vector3d &t, const Eigen::Quaterniond &r) : id(id), t(t), r(r) {}
+    
+    Pose(int id,
+         const Eigen::Vector3d &t,
+         const Eigen::Quaterniond &r,
+         uint64_t cameraMidExposureTimestamp)
+            : id(id), t(t), r(r), cameraMidExposureTimestamp(cameraMidExposureTimestamp) {}
     
     int id;
     
     Eigen::Vector3d t;
     Eigen::Quaterniond r;
+    
+    uint64_t cameraMidExposureTimestamp;
     
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

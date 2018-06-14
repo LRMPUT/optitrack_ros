@@ -456,19 +456,19 @@ public:
         memcpy(&_ori.qw, data, 4);
         data += 4;
         
-        // Associated markers
-        int nMarkers = 0;
-        memcpy(&nMarkers, data, 4);
-        data += 4;
-        for (i = 0; i < nMarkers; ++i) {
-            memcpy(&x, data, 4);
-            data += 4;
-            memcpy(&y, data, 4);
-            data += 4;
-            memcpy(&z, data, 4);
-            data += 4;
-            _markers.push_back(Point3f(x, y, z));
-        }
+//        // Associated markers
+//        int nMarkers = 0;
+//        memcpy(&nMarkers, data, 4);
+//        data += 4;
+//        for (i = 0; i < nMarkers; ++i) {
+//            memcpy(&x, data, 4);
+//            data += 4;
+//            memcpy(&y, data, 4);
+//            data += 4;
+//            memcpy(&z, data, 4);
+//            data += 4;
+//            _markers.push_back(Point3f(x, y, z));
+//        }
         
         if (nnMajor >= 2) {
             // Mean marker error
@@ -675,6 +675,7 @@ public:
     
     ~LabeledMarker() {}
     
+    // TODO Add remaining fields
     //! \brief Copy constructor.
     LabeledMarker(LabeledMarker const &other) :
             _id(other._id),
@@ -793,9 +794,18 @@ public:
             _labeledMarkers(other._labeledMarkers),
             _latency(other._latency),
             _timecode(other._timecode),
-            _subTimecode(other._subTimecode) {
+            _subTimecode(other._subTimecode),
+            _timestamp(other._timestamp),
+            _cameraMidExposureTimestamp(other._cameraMidExposureTimestamp),
+            _cameraDataReceivedTimestamp(other._cameraDataReceivedTimestamp),
+            _transmitTimestamp(other._transmitTimestamp),
+            _isRecording(other._isRecording),
+            _trackedModelsChanged(other._trackedModelsChanged)
+    {
         
     }
+    
+    
     
     //! \brief Assignment operator
     MocapFrame &operator=(MocapFrame const &other) {
@@ -812,6 +822,12 @@ public:
         _latency = other._latency;
         _timecode = other._timecode;
         _subTimecode = other._subTimecode;
+        _timestamp = other._timestamp;
+        _cameraMidExposureTimestamp = other._cameraMidExposureTimestamp;
+        _cameraDataReceivedTimestamp = other._cameraDataReceivedTimestamp;
+        _transmitTimestamp = other._transmitTimestamp;
+        _isRecording = other._isRecording;
+        _trackedModelsChanged = other._trackedModelsChanged;
         
         return *this;
     }
@@ -874,6 +890,10 @@ public:
         second = (_timecode >> 8) & 0xFF;
         frame = _timecode & 0xFF;
         subFrame = _subTimecode;
+    }
+    
+    uint64_t cameraMidExposureTimestamp(){
+        return _cameraMidExposureTimestamp;
     }
     
     /*!

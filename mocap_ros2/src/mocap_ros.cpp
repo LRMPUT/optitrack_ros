@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
             posestamped.header.seq = seqs[r]++;
 
 //            cout << "publishing for " << r << endl;
+//            cout << "cameraMidExposure timestamp = " << curPose.cameraMidExposureTimestamp << endl;
             rbPubs[r].publish(posestamped);
         }
         ros::spinOnce();
