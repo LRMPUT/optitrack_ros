@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <cstdio>
 #include <iostream>
-#include "Mocap.hpp"
+#include "../include/Mocap.hpp"
 #include <memory>
 
 using namespace std;

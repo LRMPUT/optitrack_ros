@@ -22,8 +22,8 @@
 #include "NatNet.h"
 #include "NatNetPacket.h"
 #include "NatNetSender.h"
-#include <boost/thread.hpp>
-#include <boost/circular_buffer.hpp>
+#include "../../../../../../../../usr/include/boost/thread.hpp"
+#include "../../../../../../../../usr/include/boost/circular_buffer.hpp"
 
 /*!
  * \brief Thread to listen for command responses.

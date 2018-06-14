@@ -24,9 +24,8 @@
 #ifndef RECORDING_OPTITRACK_MOCAP_HPP
 #define RECORDING_OPTITRACK_MOCAP_HPP
 
-#include <Eigen/Eigen>
-//#include <eigen3/Eigen/Dense>
-#include<Eigen/StdVector>
+#include <Eigen/Dense>
+#include <Eigen/StdVector>
 
 #include <memory>
 #include <iostream>
