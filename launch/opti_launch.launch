@@ -1,6 +1,6 @@
 <launch>
-	<!--<node name = "mocap_node" type="mocap_ros2" pkg="mocap_ros2" args = "-l 192.168.1.234 -s 192.168.1.162" launch-prefix="gdbserver host:2345" output="screen" >-->
-	<node name = "mocap_node" type="mocap_ros2" pkg="mocap_ros2" args = "-l 192.168.1.234 -s 192.168.1.162" output="screen" >
+	<!--<node name = "optitrack_node" type="optitrack" pkg="optitrack" args = "-l 192.168.1.234 -s 192.168.1.162" launch-prefix="gdbserver host:2345" output="screen" >-->
+	<node name = "optitrack_node" type="optitrack" pkg="optitrack" args = "-l 192.168.100.101 -s 192.168.100.100" output="screen" >
 		<param name="nbodies" value="1" />
 	</node>
 </launch>
