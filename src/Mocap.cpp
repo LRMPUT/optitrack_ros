@@ -42,43 +42,22 @@
 #include <iostream>
 #include "../include/Mocap.hpp"
 #include <memory>
+#include <thread>
 
 
 using namespace std;
 
+Mocap::Mocap(std::string localAddressStr, std::string serverAddressStr) {
+    localAddress = inet_addr( localAddressStr.c_str() );
+    serverAddress = inet_addr( serverAddressStr.c_str() );
+    
+    init();
+}
+
 Mocap::Mocap(int argc, char **argv) {
     readOpts(argc, argv);
-
-    //NatNet
-    lastMocapFrameValid = false;
-
-    // Set addresses
-    readOpts(argc, argv);
-    // Use this socket address to send commands to the server.
-    struct sockaddr_in serverCommands = NatNet::createAddress(serverAddress, NatNet::commandPort);
-
-    // Create sockets
-    sdCommand = NatNet::createCommandSocket(localAddress);
-    sdData = NatNet::createDataSocket(localAddress);
-
-    // Start the CommandListener in a new thread.
-    commandListener.reset(new CommandListener(sdCommand));
-    commandListener->start();
-
-    // Send a ping packet to the server so that it sends us the NatNet version
-    // in its response to commandListener.
-    NatNetPacket ping = NatNetPacket::pingPacket();
-    ping.send(sdCommand, serverCommands);
-
-    // Wait here for ping response to give us the NatNet version.
-    commandListener->getNatNetVersion(natNetMajor, natNetMinor);
-
-    // Start up a FrameListener in a new thread.
-    frameListener.reset(new FrameListener(sdData, natNetMajor, natNetMinor));
-    frameListener->start();
-    cout << "frameListener->running() = " << frameListener->running() << endl;
-//        cout << "natNetMajor = " << (int)natNetMajor << ", natNetMinor = " << (int)natNetMinor << endl;
-
+    
+    init();
 }
 
 Mocap::~Mocap() {
@@ -166,4 +145,47 @@ void Mocap::readOpts(int argc, char **argv) {
     serverAddress = inet_addr( vm["server-addr"].as<std::string>().c_str() );
 }
 
-
+void Mocap::init() {
+    //NatNet
+    lastMocapFrameValid = false;
+    
+    // Use this socket address to send commands to the server.
+    struct sockaddr_in serverCommands = NatNet::createAddress(serverAddress, NatNet::commandPort);
+    
+    // Create sockets
+    sdCommand = NatNet::createCommandSocket(localAddress);
+    sdData = NatNet::createDataSocket(localAddress);
+    
+    // Start the CommandListener in a new thread.
+    commandListener.reset(new CommandListener(sdCommand));
+    commandListener->start();
+    
+    bool natNetVersionReveived = false;
+    while(!natNetVersionReveived) {
+        cout << "Sending ping to receive NetNet version" << endl;
+        
+        // Send a ping packet to the server so that it sends us the NatNet version
+        // in its response to commandListener.
+        NatNetPacket ping = NatNetPacket::pingPacket();
+        ping.send(sdCommand, serverCommands);
+    
+        // wait 500 ms before sending another ping
+        int waitTime = 500;
+        // wait 50 ms between checks for response
+        int checkTime = 50;
+        
+        int cnt = 0;
+        // Wait here for ping response to give us the NatNet version.
+        while(cnt < waitTime/checkTime && !natNetVersionReveived){
+            this_thread::sleep_for(std::chrono::milliseconds(checkTime));
+            natNetVersionReveived = commandListener->tryGetNatNetVersion(natNetMajor, natNetMinor);
+            
+            ++cnt;
+        }
+        
+    }
+    
+    // Start up a FrameListener in a new thread.
+    frameListener.reset(new FrameListener(sdData, natNetMajor, natNetMinor));
+    frameListener->start();
+}

@@ -19,8 +19,8 @@
 #ifndef NATNETSENDER_H
 #define NATNETSENDER_H
 
-#include "../../../../../../../../usr/include/string.h"
-#include "../../../../../../../../usr/include/c++/5/string"
+#include <string.h>
+#include <string>
 
 /*!
  * \brief Encapsulates NatNet Sender packet data.
