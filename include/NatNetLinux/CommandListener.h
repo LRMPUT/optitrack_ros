@@ -22,8 +22,8 @@
 #include "NatNet.h"
 #include "NatNetPacket.h"
 #include "NatNetSender.h"
-#include "../../../../../../../../usr/include/boost/thread.hpp"
-#include "../../../../../../../../usr/include/boost/circular_buffer.hpp"
+#include <boost/thread.hpp>
+#include <boost/circular_buffer.hpp>
 
 /*!
  * \brief Thread to listen for command responses.
@@ -104,6 +104,23 @@ public:
       minor = _nnMinor;
       _nnVersionMutex.unlock();
    }
+    
+    /*!
+     * \brief Get NatNet major and minor version numbers. Non-blocking.
+     *
+     * \param major output NatNet major version
+     * \param minor output NatNet minor version
+     */
+    bool tryGetNatNetVersion( unsigned char& major, unsigned char& minor )
+    {
+        if(_nnVersionMutex.try_lock()) {
+            major = _nnMajor;
+            minor = _nnMinor;
+            _nnVersionMutex.unlock();
+            return true;
+        }
+        return false;
+    }
    
 private:
    

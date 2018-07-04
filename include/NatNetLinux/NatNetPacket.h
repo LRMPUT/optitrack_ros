@@ -19,10 +19,10 @@
 #ifndef NATNETPACKET_H
 #define NATNETPACKET_H
 
-#include "../../../../../../../../usr/lib/gcc/x86_64-linux-gnu/5/include/stdint.h"
-#include "../../../../../../../../usr/include/x86_64-linux-gnu/sys/types.h"
-#include "../../../../../../../../usr/include/x86_64-linux-gnu/sys/socket.h"
-#include "../../../../../../../../usr/include/string.h"
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <string.h>
 
 /*!
  * \brief Encapsulates NatNet packets.

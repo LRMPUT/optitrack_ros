@@ -15,15 +15,28 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     
-    Mocap mocap(argc, argv);
     Eigen::Vector3d retPos;
     Eigen::Quaterniond retOrient;
     
-    ros::init(argc, argv, "mocap_ros2_node");
+    ros::init(argc, argv, "optitrack_node");
     ros::NodeHandle n("~");
     
     int nbodies;
     n.param("nbodies", nbodies, 1);
+    
+    ROS_INFO("Number of rigid bodies to track: %d", nbodies);
+    
+    string localAddress, serverAddress;
+    if(!n.getParam("local_address", localAddress)){
+        ROS_ERROR("Could not read local_address from parameters");
+        ros::shutdown();
+    }
+    if(!n.getParam("server_address", serverAddress)){
+        ROS_ERROR("Could not read server_address from parameters");
+        ros::shutdown();
+    }
+    
+    Mocap mocap(localAddress, serverAddress);
     
     vector<ros::Publisher> rbPubs;
     vector<uint> seqs;
@@ -31,7 +44,7 @@ int main(int argc, char *argv[]) {
         rbPubs.push_back(n.advertise<geometry_msgs::PoseStamped>("optitrack" + to_string(r), 1000));
         seqs.push_back(0);
     }
-    ros::Rate loop_rate(200);
+    ros::Rate loop_rate(240);
     
     
     int count = 0;

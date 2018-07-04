@@ -1,6 +1,8 @@
 <launch>
-	<!--<node name = "optitrack_node" type="optitrack" pkg="optitrack" args = "-l 192.168.1.234 -s 192.168.1.162" launch-prefix="gdbserver host:2345" output="screen" >-->
-	<node name = "optitrack_node" type="optitrack" pkg="optitrack" args = "-l 192.168.1.2 -s 192.168.1.162" output="screen" >
+	<!--<node name = "optitrack_node" type="optitrack" pkg="optitrack" launch-prefix="gdbserver host:2345" output="screen" >-->
+	<node name = "optitrack_node" type="optitrack" pkg="optitrack" output="screen" >
 		<param name="nbodies" value="1" />
+		<param name="local_address" value="192.168.100.101" />
+		<param name="server_address" value="192.168.100.100" />
 	</node>
 </launch>

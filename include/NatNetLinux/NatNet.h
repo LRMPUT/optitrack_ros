@@ -19,22 +19,22 @@
 #ifndef NATNET_H
 #define NATNET_H
 
-#include "../../../../../../../../usr/include/c++/5/iostream"
-#include "../../../../../../../../usr/include/c++/5/iomanip"
-#include "../../../../../../../../usr/include/c++/5/ios"
-#include "../../../../../../../../usr/include/c++/5/vector"
-#include "../../../../../../../../usr/include/c++/5/cmath"
-#include "../../../../../../../../usr/include/stdio.h"
-#include "../../../../../../../../usr/include/stdlib.h"
-#include "../../../../../../../../usr/include/string.h"
+#include <iostream>
+#include <iomanip>
+#include <ios>
+#include <vector>
+#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "../../../../../../../../usr/include/unistd.h"
-#include "../../../../../../../../usr/include/errno.h"
-#include "../../../../../../../../usr/include/x86_64-linux-gnu/sys/types.h"
-#include "../../../../../../../../usr/include/x86_64-linux-gnu/sys/socket.h"
-#include "../../../../../../../../usr/include/netinet/in.h"
-#include "../../../../../../../../usr/include/arpa/inet.h"
-#include "../../../../../../../../usr/include/netdb.h"
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 /*!
  * \brief Encapsulates basic NatNet communication functionality
@@ -675,12 +675,20 @@ public:
     
     ~LabeledMarker() {}
     
-    // TODO Add remaining fields
     //! \brief Copy constructor.
     LabeledMarker(LabeledMarker const &other) :
             _id(other._id),
             _p(other._p),
-            _size(other._size) {
+            _size(other._size),
+            _occluded(other._occluded),
+            _pcSolved(other._pcSolved),
+            _modelSolved(other._modelSolved),
+            _hasModel(other._hasModel),
+            _unlabeled(other._unlabeled),
+            _activeMarker(other._activeMarker),
+            _residual(other._residual)
+    {
+    
     }
     
     //! \brief Assignment operator.
@@ -688,6 +696,14 @@ public:
         _id = other._id;
         _p = other._p;
         _size = other._size;
+        _occluded = other._occluded;
+        _pcSolved = other._pcSolved;
+        _modelSolved = other._modelSolved;
+        _hasModel = other._hasModel;
+        _unlabeled = other._unlabeled;
+        _activeMarker = other._activeMarker;
+        _residual = other._residual;
+        
         return *this;
     }
     

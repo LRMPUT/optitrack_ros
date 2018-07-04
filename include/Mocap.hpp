@@ -59,6 +59,8 @@ typedef std::vector<Pose, Eigen::aligned_allocator<Pose> > vectorPose;
 
 class Mocap {
 public:
+    Mocap(std::string localAddressStr, std::string serverAddressStr);
+    
     Mocap(int argc, char* argv[]);
 
     ~Mocap();
@@ -70,6 +72,8 @@ public:
 private:
     void readOpts(int argc, char* argv[]);
 
+    void init();
+    
     uint32_t localAddress;
     uint32_t serverAddress;
 
