@@ -1,15 +1,21 @@
+// STD
+#include <sstream>
+#include <iostream>
+#include <memory>
+#include <termios.h>
+#include <cstdio>
+#include <cstdio>
+
+// ROS
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "std_msgs/Header.h"
-#include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PoseStamped.h"
-#include <sstream>
-#include <termios.h>
-#include <stdio.h>
-#include <cstdio>
-#include <iostream>
-#include "../include/Mocap.hpp"
-#include <memory>
+#include "geometry_msgs/Point.h"
+
+// other
+#include "Mocap.hpp"
+#include "optitrack/RigidBody.h"
 
 using namespace std;
 
@@ -39,9 +45,11 @@ int main(int argc, char *argv[]) {
     Mocap mocap(localAddress, serverAddress);
     
     vector<ros::Publisher> rbPubs;
+    vector<ros::Publisher> rbDebugPubs;
     vector<uint> seqs;
     for(int r = 0; r < nbodies; ++r) {
-        rbPubs.push_back(n.advertise<geometry_msgs::PoseStamped>("optitrack" + to_string(r), 1000));
+        rbPubs.push_back(n.advertise<geometry_msgs::PoseStamped>("rigid_body_" + to_string(r), 1000));
+        rbDebugPubs.push_back(n.advertise<optitrack::RigidBody>("rigid_body_debug_" + to_string(r), 1000));
         seqs.push_back(0);
     }
     ros::Rate loop_rate(240);
@@ -66,16 +74,37 @@ int main(int argc, char *argv[]) {
             quat.z = curPose.r.z();
             quat.w = curPose.r.w();
 
-            geometry_msgs::PoseStamped posestamped;
-            posestamped.pose.position = point;
-            posestamped.pose.orientation = quat;
-            posestamped.header.frame_id = "0";
-            posestamped.header.stamp = curTimestamp;
-            posestamped.header.seq = seqs[r]++;
+            {
+                geometry_msgs::PoseStamped poseStamped;
+                poseStamped.header.frame_id = "optitrack";
+                poseStamped.header.stamp = curTimestamp;
+                poseStamped.header.seq = seqs[r];
+                poseStamped.pose.position = point;
+                poseStamped.pose.orientation = quat;
 
 //            cout << "publishing for " << r << endl;
 //            cout << "cameraMidExposure timestamp = " << curPose.cameraMidExposureTimestamp << endl;
-            rbPubs[r].publish(posestamped);
+                rbPubs[r].publish(poseStamped);
+            }
+            {
+                optitrack::RigidBody rigidBody;
+                rigidBody.header.frame_id = "optitrack";
+                rigidBody.header.stamp = curTimestamp;
+                rigidBody.header.seq = seqs[r];
+                rigidBody.pose.position = point;
+                rigidBody.pose.orientation = quat;
+                rigidBody.timestamp = curPose.cameraMidExposureTimestamp;
+                rigidBody.meanError = curPose.meanError;
+                for(const Eigen::Vector3d &pt : curPose.markers){
+                    geometry_msgs::Point ptRos;
+                    ptRos.x = pt(0);
+                    ptRos.y = pt(1);
+                    ptRos.z = pt(2);
+                    rigidBody.markers.push_back(ptRos);
+                }
+            }
+
+            ++seqs[r];
         }
         ros::spinOnce();
         loop_rate.sleep();

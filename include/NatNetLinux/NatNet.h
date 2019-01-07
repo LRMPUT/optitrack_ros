@@ -420,7 +420,9 @@ public:
     
     //! \brief Vector of markers that make up this RigidBody
     std::vector<Point3f> const &markers() const { return _markers; }
-    
+
+    float meanError() const { return _mErr; }
+
     //! \brief True if the tracking is valid. Used in NatNet version >= 2.6.
     bool trackingValid() const { return _trackingValid; }
     

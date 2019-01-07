@@ -37,21 +37,36 @@
 struct Pose{
     Pose() {}
     
-    Pose(int id, const Eigen::Vector3d &t, const Eigen::Quaterniond &r) : id(id), t(t), r(r) {}
-    
+//    Pose(int id, const Eigen::Vector3d &t, const Eigen::Quaterniond &r) : id(id), t(t), r(r) {}
+//
+//    Pose(int id,
+//         const Eigen::Vector3d &t,
+//         const Eigen::Quaterniond &r,
+//         uint64_t cameraMidExposureTimestamp)
+//            : id(id), t(t), r(r), cameraMidExposureTimestamp(cameraMidExposureTimestamp)
+//    {}
+
     Pose(int id,
          const Eigen::Vector3d &t,
          const Eigen::Quaterniond &r,
-         uint64_t cameraMidExposureTimestamp)
-            : id(id), t(t), r(r), cameraMidExposureTimestamp(cameraMidExposureTimestamp) {}
-    
+         uint64_t cameraMidExposureTimestamp = 0,
+         float meanError = 0,
+         const std::vector<Eigen::Vector3d> &markers = std::vector<Eigen::Vector3d>())
+            : id(id), t(t), r(r), cameraMidExposureTimestamp(cameraMidExposureTimestamp), meanError(meanError), markers(markers)
+    {}
+
+
     int id;
     
     Eigen::Vector3d t;
     Eigen::Quaterniond r;
     
     uint64_t cameraMidExposureTimestamp;
-    
+
+    double meanError;
+
+    std::vector<Eigen::Vector3d> markers;
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 

@@ -20,7 +20,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-
+// STD
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -28,21 +28,22 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <iostream>
-
-#include "NatNetLinux/NatNet.h"
-
-#include <boost/program_options.hpp>
-#include <time.h>
-
-#include "../include/Mocap.hpp"
 #include <termios.h>
-#include <stdio.h>
 #include <cstdio>
 #include <iostream>
-#include "../include/Mocap.hpp"
 #include <memory>
 #include <thread>
+#include <ctime>
+
+// boost
+#include <boost/program_options.hpp>
+
+// other
+#include "NatNetLinux/NatNet.h"
+
+#include "Mocap.hpp"
+
+
 
 
 using namespace std;
@@ -99,7 +100,12 @@ vectorPose Mocap::getLatestPoses() {
 
         
         const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
-        for(const RigidBody &rb : rigidBodies) {
+        const std::vector<MarkerSet> &markerSets = mocapFrame.markerSets();
+
+        for(int ir = 0; ir < rigidBodies.size(); ++ir){
+            const RigidBody &rb = rigidBodies[ir];
+            // TODO Check if they are matching
+            const MarkerSet &ms = markerSets[ir];
             if(rb.trackingValid()) {
                 Eigen::Vector3d t;
                 Eigen::Quaterniond r;
@@ -110,8 +116,16 @@ vectorPose Mocap::getLatestPoses() {
                 r.y() = rb.orientation().qy;
                 r.z() = rb.orientation().qz;
                 r.w() = rb.orientation().qw;
+
+                std::vector<Eigen::Vector3d> markers;
+                for(const Point3f &curMarker : ms.markers()){
+                    Eigen::Vector3d pt;
+                    pt(0) = curMarker.x;
+                    pt(1) = curMarker.y;
+                    pt(2) = curMarker.z;
+                }
     
-                ret.emplace_back(rb.id(), t, r, mocapFrame.cameraMidExposureTimestamp());
+                ret.emplace_back(rb.id(), t, r, mocapFrame.cameraMidExposureTimestamp(), rb.meanError(), markers);
             }
         }
     }
