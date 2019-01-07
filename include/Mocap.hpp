@@ -34,6 +34,20 @@
 #include "NatNetLinux/CommandListener.h"
 #include "NatNetLinux/FrameListener.h"
 
+struct Marker{
+    Marker() {}
+
+    Marker(int id, const Eigen::Vector3d &location, double residual, bool occluded)
+            : id(id), location(location), residual(residual), occluded(occluded) {}
+
+    int id;
+    Eigen::Vector3d location;
+    double residual;
+    bool occluded;
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 struct Pose{
     Pose() {}
     
@@ -49,10 +63,10 @@ struct Pose{
     Pose(int id,
          const Eigen::Vector3d &t,
          const Eigen::Quaterniond &r,
-         uint64_t cameraMidExposureTimestamp = 0,
-         float meanError = 0,
-         const std::vector<Eigen::Vector3d> &markers = std::vector<Eigen::Vector3d>())
-            : id(id), t(t), r(r), cameraMidExposureTimestamp(cameraMidExposureTimestamp), meanError(meanError), markers(markers)
+         double timestamp = 0,
+         double meanError = 0,
+         const std::vector<Marker> &markers = std::vector<Marker>())
+            : id(id), t(t), r(r), timestamp(timestamp), meanError(meanError), markers(markers)
     {}
 
 
@@ -61,11 +75,11 @@ struct Pose{
     Eigen::Vector3d t;
     Eigen::Quaterniond r;
     
-    uint64_t cameraMidExposureTimestamp;
+    double timestamp;
 
     double meanError;
 
-    std::vector<Eigen::Vector3d> markers;
+    std::vector<Marker> markers;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

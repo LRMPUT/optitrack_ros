@@ -670,7 +670,8 @@ public:
     
     //! \brief Default constructor.
     LabeledMarker() :
-            _id(0),
+            _markerId(0),
+            _modelId(0),
             _p(),
             _size(0.f) {
     }
@@ -679,7 +680,8 @@ public:
     
     //! \brief Copy constructor.
     LabeledMarker(LabeledMarker const &other) :
-            _id(other._id),
+            _markerId(other._markerId),
+            _modelId(other._modelId),
             _p(other._p),
             _size(other._size),
             _occluded(other._occluded),
@@ -695,7 +697,8 @@ public:
     
     //! \brief Assignment operator.
     LabeledMarker &operator=(LabeledMarker const &other) {
-        _id = other._id;
+        _markerId = other._markerId;
+        _modelId = other._modelId;
         _p = other._p;
         _size = other._size;
         _occluded = other._occluded;
@@ -710,13 +713,20 @@ public:
     }
     
     //! \brief ID of this marker.
-    int id() const { return _id; }
-    
+    int markerId() const { return _markerId; }
+
+    //! \brief ID of model this marker belongs to.
+    int modelId() const { return _modelId; }
+
     //! \brief Location of this marker.
     Point3f location() const { return _p; }
     
     //! \brief Size of this marker.
     float size() const { return _size; }
+
+    float residual() const { return _residual; }
+
+    bool occluded() const { return _occluded; }
     
     /*!
      * \brief Unpack the marker from packed data.
@@ -725,8 +735,10 @@ public:
      * \returns pointer to data immediately following the labeled marker data
      */
     char const *unpack(char const *data, char nnMajor, char nnMinor) {
-        memcpy(&_id, data, 4);
-        data += 4;
+        memcpy(&_markerId, data, 2);
+        data += 2;
+        memcpy(&_modelId, data, 2);
+        data += 2;
         memcpy(&_p.x, data, 4);
         data += 4;
         memcpy(&_p.y, data, 4);
@@ -764,7 +776,7 @@ public:
     }
 
 private:
-    int _id;
+    uint16_t _markerId, _modelId;
     Point3f _p;
     float _size;
     bool _occluded, _pcSolved, _modelSolved, _hasModel, _unlabeled, _activeMarker;
@@ -860,6 +872,8 @@ public:
     
     //! \brief All the sets of markers except unidentified ones.
     std::vector<MarkerSet> const &markerSets() const { return _markerSet; }
+
+    std::vector<LabeledMarker> const &labeledMarkers() const { return _labeledMarkers; }
     
     //! \brief Set of unidentified markers.
     std::vector<Point3f> const &unIdMarkers() const { return _uidMarker; }
@@ -909,8 +923,12 @@ public:
         frame = _timecode & 0xFF;
         subFrame = _subTimecode;
     }
+
+    double timestamp() const {
+        return _timestamp;
+    }
     
-    uint64_t cameraMidExposureTimestamp(){
+    uint64_t cameraMidExposureTimestamp() const {
         return _cameraMidExposureTimestamp;
     }
     
@@ -1070,7 +1088,7 @@ public:
             data += 4;
             _timestamp = (double) fTemp;
         }
-        
+
         // high res timestamps (version 3.0 and later)
         if ((_nnMajor >= 3) || (_nnMajor == 0)) {
             _cameraMidExposureTimestamp = 0;

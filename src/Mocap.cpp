@@ -98,14 +98,14 @@ vectorPose Mocap::getLatestPoses() {
     vectorPose ret;
     if (lastMocapFrameValid) {
 
-        
+//        cout << mocapFrame.cameraMidExposureTimestamp() << endl;
+
+        cout << mocapFrame.frameNum() << endl;
+
         const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
-        const std::vector<MarkerSet> &markerSets = mocapFrame.markerSets();
 
         for(int ir = 0; ir < rigidBodies.size(); ++ir){
             const RigidBody &rb = rigidBodies[ir];
-            // TODO Check if they are matching
-            const MarkerSet &ms = markerSets[ir];
             if(rb.trackingValid()) {
                 Eigen::Vector3d t;
                 Eigen::Quaterniond r;
@@ -117,15 +117,21 @@ vectorPose Mocap::getLatestPoses() {
                 r.z() = rb.orientation().qz;
                 r.w() = rb.orientation().qw;
 
-                std::vector<Eigen::Vector3d> markers;
-                for(const Point3f &curMarker : ms.markers()){
-                    Eigen::Vector3d pt;
-                    pt(0) = curMarker.x;
-                    pt(1) = curMarker.y;
-                    pt(2) = curMarker.z;
+                std::vector<Marker> markers;
+                for(const LabeledMarker &labMark : mocapFrame.labeledMarkers()){
+                    if(labMark.modelId() == rb.id()) {
+//                        cout << labMark.markerId() << ": " << labMark.residual() << endl;
+                        Marker curMark;
+                        curMark.location(0) = labMark.location().x;
+                        curMark.location(1) = labMark.location().y;
+                        curMark.location(2) = labMark.location().z;
+                        curMark.residual = labMark.residual();
+                        curMark.occluded = labMark.occluded();
+                        markers.push_back(curMark);
+                    }
                 }
     
-                ret.emplace_back(rb.id(), t, r, mocapFrame.cameraMidExposureTimestamp(), rb.meanError(), markers);
+                ret.emplace_back(rb.id(), t, r, mocapFrame.timestamp(), rb.meanError(), markers);
             }
         }
     }

@@ -16,6 +16,7 @@
 // other
 #include "Mocap.hpp"
 #include "optitrack/RigidBody.h"
+#include "optitrack/Marker.h"
 
 using namespace std;
 
@@ -93,15 +94,19 @@ int main(int argc, char *argv[]) {
                 rigidBody.header.seq = seqs[r];
                 rigidBody.pose.position = point;
                 rigidBody.pose.orientation = quat;
-                rigidBody.timestamp = curPose.cameraMidExposureTimestamp;
+                rigidBody.timestamp = curPose.timestamp;
                 rigidBody.meanError = curPose.meanError;
-                for(const Eigen::Vector3d &pt : curPose.markers){
-                    geometry_msgs::Point ptRos;
-                    ptRos.x = pt(0);
-                    ptRos.y = pt(1);
-                    ptRos.z = pt(2);
-                    rigidBody.markers.push_back(ptRos);
+                for(const Marker &marker : curPose.markers){
+                    optitrack::Marker markerRos;
+                    markerRos.location.x = marker.location(0);
+                    markerRos.location.y = marker.location(1);
+                    markerRos.location.z = marker.location(2);
+                    markerRos.residual = marker.residual;
+                    markerRos.occluded = marker.occluded;
+                    rigidBody.markers.push_back(markerRos);
                 }
+
+                rbDebugPubs[r].publish(rigidBody);
             }
 
             ++seqs[r];
