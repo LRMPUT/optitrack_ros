@@ -100,7 +100,7 @@ vectorPose Mocap::getLatestPoses() {
 
 //        cout << mocapFrame.cameraMidExposureTimestamp() << endl;
 
-        cout << mocapFrame.frameNum() << endl;
+//        cout << mocapFrame.frameNum() << endl;
 
         const std::vector<RigidBody> &rigidBodies = mocapFrame.rigidBodies();
 
