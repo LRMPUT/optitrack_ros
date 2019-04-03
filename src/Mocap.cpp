@@ -94,7 +94,8 @@ bool Mocap::getLatestPose(Eigen::Vector3d &retPos, Eigen::Quaterniond &retOrient
 
 vectorPose Mocap::getLatestPoses() {
     MocapFrame mocapFrame(frameListener->pop(&lastMocapFrameValid).first);
-    
+
+    FrameNum=mocapFrame.frameNum();
     vectorPose ret;
     if (lastMocapFrameValid) {
 

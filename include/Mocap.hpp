@@ -98,6 +98,8 @@ public:
                         Eigen::Quaterniond& retOrient);
     
     vectorPose getLatestPoses();
+
+    int FrameNum;
 private:
     void readOpts(int argc, char* argv[]);
 
