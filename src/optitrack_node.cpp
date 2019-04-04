@@ -23,18 +23,18 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    
+
     Eigen::Vector3d retPos;
     Eigen::Quaterniond retOrient;
-    
+
     ros::init(argc, argv, "optitrack_node");
     ros::NodeHandle n("~");
-    
+
     int nbodies;
     n.param("nbodies", nbodies, 1);
-    
+
     ROS_INFO("Number of rigid bodies to track: %d", nbodies);
-    
+
     string localAddress, serverAddress;
     if(!n.getParam("local_address", localAddress)){
         ROS_ERROR("Could not read local_address from parameters");
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     {
         ser.setPort("/dev/ttyUSB0");
         ser.setBaudrate(115200);
-        serial::Timeout to = serial::Timeout::simpleTimeout(1000);
+        serial::Timeout to = serial::Timeout::simpleTimeout(3);
         ser.setTimeout(to);
         ser.open();
     }
@@ -82,11 +82,14 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
+    //todo camelCase variables
     map<int,ros::Time> FrameTimeStamp;
     bool First=1;
     int First_Frame_ID=0;
     int Local_Frame_ID=0;
     int Local_cnt_frame=1;
+    int first_100_counter=0;
+
     // Create a map iterator and point to beginning of map
     std::map<int,ros::Time>::iterator MapIterator= FrameTimeStamp.begin();
 
@@ -105,10 +108,13 @@ int main(int argc, char *argv[]) {
 
 
         vectorPose poses = mocap.getLatestPoses();
+
+        //ROS_INFO("ROS:Map NUM: %d", mocap.FrameNum);
         if(First==0)
         {
 
-            // ROS_INFO("ROS:Map size: %d",FrameTimeStamp.size());
+            //ROS_INFO("ROS:Map size: %d",FrameTimeStamp.size());
+            //todo mocap.FrameNum add to Pose()
             if(mocap.FrameNum>0 && FrameTimeStamp.count(mocap.FrameNum)>0  )
             {
                 ros::Time curTimestamp = ros::Time::now();
@@ -164,23 +170,42 @@ int main(int argc, char *argv[]) {
                     ++seqs[r];
                 }
 
-                // ros::Time Start=ros::Time::now();
+                //ros::Time Start=ros::Time::now();
                 while(MapIterator->first < mocap.FrameNum -300 )
                 {
+                    //ROS_INFO("ROS: DELETED FRAME: %d", MapIterator->first);
                     MapIterator= FrameTimeStamp.erase(MapIterator);
                 }
                 //ros::Time end =ros::Time::now();
-                //ROS_INFO("ROS:while time %f", (end-Start).toNSec()*1e-6);
+                // ROS_INFO("ROS:while time %f", (end-Start).toNSec()*1e-6);
+            }else{
+                ROS_INFO("ROS: MOCAP fram NUM %d", mocap.FrameNum);
+                ROS_INFO("ROS: MAP first  %d",FrameTimeStamp.begin()->first);
+                ROS_INFO("ROS: MAP end  %d",FrameTimeStamp.rbegin()->first);
             }
 
         }
 
 
-        if(First && !poses.empty())
+        if(First && mocap.FrameNum!=-1)
         {
-            First=0;
-            First_Frame_ID=mocap.FrameNum;
-            Local_cnt_frame=1;
+
+            if (first_100_counter++ >= 100)
+            {
+                First=0;
+            }
+            // todo var before loop
+            static int first_min_cnt;
+            if(first_min_cnt==0)
+            {
+                first_min_cnt++;
+                First_Frame_ID=mocap.FrameNum;
+            }
+
+            if(mocap.FrameNum<First_Frame_ID)
+            {
+                First_Frame_ID=mocap.FrameNum;
+            }
             MapIterator= FrameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",First_Frame_ID);
         }
@@ -194,7 +219,7 @@ int main(int argc, char *argv[]) {
     ser.close();
     cout<<"ROS:NODE:STOP"<<endl;
     return 0;
-    
+
 }
 
 
