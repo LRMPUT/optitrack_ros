@@ -113,9 +113,6 @@ int main(int argc, char *argv[]) {
         {
 
             //ROS_INFO("ROS:Map size: %d",frameTimeStamp.size());
-            // todo mocap.FrameNum add to Pose()
-            // todo if frameNum is in Pose() i do not have access to it in here, but in loop 5 lines below
-            // todo or can I use poses[0].frameNum() ???
             if(poses[0].FrameNum>0 && frameTimeStamp.count(poses[0].FrameNum)>0  )
 //            if(mocap.FrameNum>0 && frameTimeStamp.count(mocap.FrameNum)>0  )
             {
