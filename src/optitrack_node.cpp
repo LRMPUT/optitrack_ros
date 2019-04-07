@@ -82,8 +82,7 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
-    //todo camelCase variables
-    map<int,ros::Time> FrameTimeStamp;
+    map<int,ros::Time> frameTimeStamp;
     bool firstFrameFlag=1;
     int firstFrameId=0;
     int localFrameId=0;
@@ -91,7 +90,7 @@ int main(int argc, char *argv[]) {
     int firstHundredFramesCounter=0;
     static int firstMinCnt;
     // Create a map iterator and point to beginning of map
-    std::map<int,ros::Time>::iterator MapIterator= FrameTimeStamp.begin();
+    std::map<int,ros::Time>::iterator MapIterator= frameTimeStamp.begin();
 
     //FT232
     std::vector<uint8_t> zero;
@@ -101,7 +100,7 @@ int main(int argc, char *argv[]) {
         if(ser.isOpen() && (count %2==0))
         {
             localFrameId=localCntFrame+firstFrameId;
-            FrameTimeStamp[localFrameId]=ros::Time::now();
+            frameTimeStamp[localFrameId]=ros::Time::now();
             ser.write(zero);
             localCntFrame++;
         }
@@ -113,12 +112,12 @@ int main(int argc, char *argv[]) {
         if(firstFrameFlag==0)
         {
 
-            //ROS_INFO("ROS:Map size: %d",FrameTimeStamp.size());
+            //ROS_INFO("ROS:Map size: %d",frameTimeStamp.size());
             // todo mocap.FrameNum add to Pose()
             // todo if frameNum is in Pose() i do not have access to it in here, but in loop 5 lines below
             // todo or can I use poses[0].frameNum() ???
-            if(poses[0].FrameNum>0 && FrameTimeStamp.count(poses[0].FrameNum)>0  )
-//            if(mocap.FrameNum>0 && FrameTimeStamp.count(mocap.FrameNum)>0  )
+            if(poses[0].FrameNum>0 && frameTimeStamp.count(poses[0].FrameNum)>0  )
+//            if(mocap.FrameNum>0 && frameTimeStamp.count(mocap.FrameNum)>0  )
             {
                 ros::Time curTimestamp = ros::Time::now();
 
@@ -178,15 +177,15 @@ int main(int argc, char *argv[]) {
 //                while(MapIterator->first < mocap.FrameNum -300 )
                 {
                     //ROS_INFO("ROS: DELETED FRAME: %d", MapIterator->first);
-                    MapIterator= FrameTimeStamp.erase(MapIterator);
+                    MapIterator= frameTimeStamp.erase(MapIterator);
                 }
                 //ros::Time end =ros::Time::now();
                 // ROS_INFO("ROS:while time %f", (end-Start).toNSec()*1e-6);
             }else{
                 ROS_INFO("ROS: MOCAP fram NUM %d", poses[0].FrameNum);
 //                ROS_INFO("ROS: MOCAP fram NUM %d", mocap.FrameNum);
-                ROS_INFO("ROS: MAP first  %d",FrameTimeStamp.begin()->first);
-                ROS_INFO("ROS: MAP end  %d",FrameTimeStamp.rbegin()->first);
+                ROS_INFO("ROS: MAP first  %d",frameTimeStamp.begin()->first);
+                ROS_INFO("ROS: MAP end  %d",frameTimeStamp.rbegin()->first);
             }
 
         }
@@ -214,7 +213,7 @@ int main(int argc, char *argv[]) {
                 firstFrameId=poses[0].FrameNum;
 //                firstFrameId=mocap.FrameNum;
             }
-            MapIterator= FrameTimeStamp.begin();
+            MapIterator= frameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",firstFrameId);
         }
 
