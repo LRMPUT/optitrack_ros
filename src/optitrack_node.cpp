@@ -88,9 +88,7 @@ int main(int argc, char *argv[]) {
     int localFrameId=0;
     int localCntFrame=1;
     int firstFramesCounter=0;
-    static int firstMinCnt;
-    // Create a map iterator and point to beginning of map
-    std::map<int,ros::Time>::iterator MapIterator= frameTimeStamp.begin();
+    int firstMinCnt=0;
 
     //FT232
     std::vector<uint8_t> zero;
@@ -172,7 +170,7 @@ int main(int argc, char *argv[]) {
         }
 
 
-        if(firstFrameFlag && poses[0].frameNum!=-1){
+        if(!poses.empty() && firstFrameFlag && poses[0].frameNum!=-1){
 
             if (firstFramesCounter++ >= firstGrabbedFrames) {
                 firstFrameFlag=0;
