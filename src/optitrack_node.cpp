@@ -80,12 +80,14 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
+    static constexpr mapBufferSize = 300;
+    static constexpr firstGrabbedFrames = 100;
     map<int,ros::Time> frameTimeStamp;
     bool firstFrameFlag=1;
     int firstFrameId=0;
     int localFrameId=0;
     int localCntFrame=1;
-    int firstHundredFramesCounter=0;
+    int firstFramesCounter=0;
     static int firstMinCnt;
     // Create a map iterator and point to beginning of map
     std::map<int,ros::Time>::iterator MapIterator= frameTimeStamp.begin();
@@ -106,7 +108,7 @@ int main(int argc, char *argv[]) {
         vectorPose poses = mocap.getLatestPoses();
 
         if(firstFrameFlag==0){
-            if(poses[0].FrameNum>0 && frameTimeStamp.count(poses[0].FrameNum)>0 ){
+            if(poses.size() >0 && poses[0].frameNum>0 && frameTimeStamp.count(poses[0].frameNum)>0 ){
                 ros::Time curTimestamp = ros::Time::now();
 
                 for(const Pose &curPose : poses){
@@ -157,7 +159,7 @@ int main(int argc, char *argv[]) {
                     }
                     ++seqs[r];
                 }
-                while(MapIterator->first < poses[0].FrameNum -300 ){
+                while(frameTimeStamp.begin() < poses[0].frameNum - mapBufferSize ){
                     MapIterator= frameTimeStamp.erase(MapIterator);
                 }
 
@@ -168,19 +170,19 @@ int main(int argc, char *argv[]) {
         }
 
 
-        if(firstFrameFlag && poses[0].FrameNum!=-1){
+        if(firstFrameFlag && poses[0].frameNum!=-1){
 
-            if (firstHundredFramesCounter++ >= 100) {
+            if (firstFramesCounter++ >= firstGrabbedFrames) {
                 firstFrameFlag=0;
             }
 
             if(firstMinCnt==0){
                 firstMinCnt++;
-                firstFrameId=poses[0].FrameNum;
+                firstFrameId=poses[0].frameNum;
             }
 
-            if(poses[0].FrameNum<firstFrameId){
-                firstFrameId=poses[0].FrameNum;
+            if(poses[0].frameNum<firstFrameId){
+                firstFrameId=poses[0].frameNum;
             }
             MapIterator= frameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",firstFrameId);

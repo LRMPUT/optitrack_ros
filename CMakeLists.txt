@@ -8,11 +8,12 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  geometry_msgs
-  message_generation
+        roscpp
+        rospy
+        serial
+        std_msgs
+        geometry_msgs
+        message_generation
 )
 
 find_package(Boost REQUIRED COMPONENTS thread system program_options filesystem)
