@@ -65,8 +65,9 @@ struct Pose{
          const Eigen::Quaterniond &r,
          double timestamp = 0,
          double meanError = 0,
-         const std::vector<Marker> &markers = std::vector<Marker>())
-            : id(id), t(t), r(r), timestamp(timestamp), meanError(meanError), markers(markers)
+         const std::vector<Marker> &markers = std::vector<Marker>(),
+         int frameNum=0)
+            : id(id), t(t), r(r), timestamp(timestamp), meanError(meanError), markers(markers), frameNum(frameNum)
     {}
 
 
@@ -78,6 +79,8 @@ struct Pose{
     double timestamp;
 
     double meanError;
+
+    int frameNum;
 
     std::vector<Marker> markers;
 
@@ -98,6 +101,7 @@ public:
                         Eigen::Quaterniond& retOrient);
     
     vectorPose getLatestPoses();
+
 private:
     void readOpts(int argc, char* argv[]);
 
