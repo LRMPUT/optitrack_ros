@@ -58,16 +58,14 @@ int main(int argc, char *argv[]) {
 
     // SERIAL INIT
     serial::Serial ser;
-    try
-    {
+    try{
         ser.setPort("/dev/ttyUSB0");
         ser.setBaudrate(115200);
         serial::Timeout to = serial::Timeout::simpleTimeout(3);
         ser.setTimeout(to);
         ser.open();
     }
-    catch (serial::IOException& e)
-    {
+    catch (serial::IOException& e){
         ROS_ERROR_STREAM("Unable to open port ");
         return -1;
     }
@@ -105,17 +103,10 @@ int main(int argc, char *argv[]) {
             localCntFrame++;
         }
 
-
         vectorPose poses = mocap.getLatestPoses();
 
-        //ROS_INFO("ROS:Map NUM: %d", mocap.FrameNum);
-        if(firstFrameFlag==0)
-        {
-
-            //ROS_INFO("ROS:Map size: %d",frameTimeStamp.size());
-            if(poses[0].FrameNum>0 && frameTimeStamp.count(poses[0].FrameNum)>0  )
-//            if(mocap.FrameNum>0 && frameTimeStamp.count(mocap.FrameNum)>0  )
-            {
+        if(firstFrameFlag==0){
+            if(poses[0].FrameNum>0 && frameTimeStamp.count(poses[0].FrameNum)>0 ){
                 ros::Time curTimestamp = ros::Time::now();
 
                 for(const Pose &curPose : poses){
@@ -162,53 +153,34 @@ int main(int argc, char *argv[]) {
                             markerRos.occluded = marker.occluded;
                             rigidBody.markers.push_back(markerRos);
                         }
-
                         rbDebugPubs[r].publish(rigidBody);
                     }
-
                     ++seqs[r];
                 }
-
-                //ros::Time Start=ros::Time::now();
-                while(MapIterator->first < poses[0].FrameNum -300 )
-//                while(MapIterator->first < mocap.FrameNum -300 )
-                {
-                    //ROS_INFO("ROS: DELETED FRAME: %d", MapIterator->first);
+                while(MapIterator->first < poses[0].FrameNum -300 ){
                     MapIterator= frameTimeStamp.erase(MapIterator);
                 }
-                //ros::Time end =ros::Time::now();
-                // ROS_INFO("ROS:while time %f", (end-Start).toNSec()*1e-6);
+
             }else{
-                ROS_INFO("ROS: MOCAP fram NUM %d", poses[0].FrameNum);
-//                ROS_INFO("ROS: MOCAP fram NUM %d", mocap.FrameNum);
-                ROS_INFO("ROS: MAP first  %d",frameTimeStamp.begin()->first);
-                ROS_INFO("ROS: MAP end  %d",frameTimeStamp.rbegin()->first);
+
             }
 
         }
 
 
-        if(firstFrameFlag && poses[0].FrameNum!=-1)
-//        if(firstFrameFlag && mocap.FrameNum!=-1)
-        {
+        if(firstFrameFlag && poses[0].FrameNum!=-1){
 
-            if (firstHundredFramesCounter++ >= 100)
-            {
+            if (firstHundredFramesCounter++ >= 100) {
                 firstFrameFlag=0;
             }
 
-            if(firstMinCnt==0)
-            {
+            if(firstMinCnt==0){
                 firstMinCnt++;
                 firstFrameId=poses[0].FrameNum;
-//                firstFrameId=mocap.FrameNum;
             }
 
-            if(poses[0].FrameNum<firstFrameId)
-//            if(mocap.FrameNum<firstFrameId)
-            {
+            if(poses[0].FrameNum<firstFrameId){
                 firstFrameId=poses[0].FrameNum;
-//                firstFrameId=mocap.FrameNum;
             }
             MapIterator= frameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",firstFrameId);
