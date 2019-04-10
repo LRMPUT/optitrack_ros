@@ -97,8 +97,7 @@ int main(int argc, char *argv[]) {
     zero.push_back(0);
 
     while (ros::ok()) {
-        if(ser.isOpen() && (count %2==0))
-        {
+        if(ser.isOpen() && (count %2==0)){
             localFrameId=localCntFrame+firstFrameId;
             frameTimeStamp[localFrameId]=ros::Time::now();
             ser.write(zero);
@@ -108,7 +107,7 @@ int main(int argc, char *argv[]) {
         vectorPose poses = mocap.getLatestPoses();
 
         if(firstFrameFlag==0){
-            if(poses.size() >0 && poses[0].frameNum>0 && frameTimeStamp.count(poses[0].frameNum)>0 ){
+            if(poses.size() > 0 && poses[0].frameNum>0 && frameTimeStamp.count(poses[0].frameNum)>0 ){
                 ros::Time curTimestamp = ros::Time::now();
 
                 for(const Pose &curPose : poses){
@@ -159,7 +158,7 @@ int main(int argc, char *argv[]) {
                     }
                     ++seqs[r];
                 }
-                while(frameTimeStamp.begin() < poses[0].frameNum - mapBufferSize ){
+                while(MapIterator->first < poses[0].frameNum - mapBufferSize ){
                     MapIterator= frameTimeStamp.erase(MapIterator);
                 }
 
