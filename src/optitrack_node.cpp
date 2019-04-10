@@ -158,10 +158,12 @@ int main(int argc, char *argv[]) {
                     }
                     ++seqs[r];
                 }
-                while(MapIterator->first < poses[0].frameNum - mapBufferSize ){
+                /*while(MapIterator->first < poses[0].frameNum - mapBufferSize ){
                     MapIterator= frameTimeStamp.erase(MapIterator);
+                }*/
+                while(frameTimeStamp.begin()->first < poses[0].frameNum - mapBufferSize ){
+                    frameTimeStamp.erase(frameTimeStamp.begin());
                 }
-
             }else{
 
             }
