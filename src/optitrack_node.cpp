@@ -80,8 +80,8 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
-    static constexpr mapBufferSize = 300;
-    static constexpr firstGrabbedFrames = 100;
+    static constexpr int mapBufferSize = 300;
+    static constexpr int firstGrabbedFrames = 100;
     map<int,ros::Time> frameTimeStamp;
     bool firstFrameFlag=1;
     int firstFrameId=0;

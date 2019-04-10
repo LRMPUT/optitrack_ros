@@ -66,7 +66,7 @@ struct Pose{
          double timestamp = 0,
          double meanError = 0,
          const std::vector<Marker> &markers = std::vector<Marker>(),
-         int frameNum)
+         int frameNum=0)
             : id(id), t(t), r(r), timestamp(timestamp), meanError(meanError), markers(markers), frameNum(frameNum)
     {}
 
