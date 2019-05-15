@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     ROS_INFO("Number of rigid bodies to track: %d", nbodies);
 
-    string localAddress, serverAddress;
+    string localAddress, serverAddress, usbPort;
     if(!n.getParam("local_address", localAddress)){
         ROS_ERROR("Could not read local_address from parameters");
         ros::shutdown();
@@ -44,6 +44,11 @@ int main(int argc, char *argv[]) {
         ROS_ERROR("Could not read server_address from parameters");
         ros::shutdown();
     }
+    if(!n.getParam("USB_port", usbPort)){
+        ROS_ERROR("Could not read USB_port from parameters");
+        ros::shutdown();
+    }
+
 
     Mocap mocap(localAddress, serverAddress);
 
@@ -59,7 +64,7 @@ int main(int argc, char *argv[]) {
     // SERIAL INIT
     serial::Serial ser;
     try{
-        ser.setPort("/dev/ttyUSB0");
+        ser.setPort(usbPort);
         ser.setBaudrate(115200);
         serial::Timeout to = serial::Timeout::simpleTimeout(3);
         ser.setTimeout(to);
@@ -125,7 +130,7 @@ int main(int argc, char *argv[]) {
                     {
                         geometry_msgs::PoseStamped poseStamped;
                         poseStamped.header.frame_id = "optitrack";
-                        poseStamped.header.stamp = curTimestamp;
+                        poseStamped.header.stamp = frameTimeStamp.at(curPose.frameNum);
                         poseStamped.header.seq = seqs[r];
                         poseStamped.pose.position = point;
                         poseStamped.pose.orientation = quat;
@@ -184,7 +189,6 @@ int main(int argc, char *argv[]) {
             if(poses[0].frameNum<firstFrameId){
                 firstFrameId=poses[0].frameNum;
             }
-            MapIterator= frameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",firstFrameId);
         }
 
