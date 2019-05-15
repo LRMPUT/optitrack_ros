@@ -85,15 +85,17 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
-    static constexpr int mapBufferSize = 300;
-    static constexpr int firstGrabbedFrames = 100;
+    static constexpr int mapBufferSize = 300; 		// size of map buffer
+    static constexpr int firstGrabbedFrames = 100; 	// number of frames needed for initialization
     map<int,ros::Time> frameTimeStamp;
-    bool firstFrameFlag=1;
-    int firstFrameId=0;
-    int localFrameId=0;
-    int localCntFrame=1;
-    int firstFramesCounter=0;
-    int firstMinCnt=0;
+
+    int localCntFrame=1; 	// local frameID incremented after each COM send 
+    int firstFrameId=0;  	// lowest frameId grabbed form optitrack
+    int localFrameId=0;  	// frameId saved in map -> localCntFrame+firstFrameId;
+    
+    int firstFramesCounter=0; 	// Counts number of grabbed frames for initialization purpose
+    int firstMinCnt=0;        	// First ever grabbed frame flag
+    bool firstFrameFlag=1; 	// First frame flag. Set to 0 if firstFramesCounter == firstGrabbedFrames. It starts publishing to topics
 
     //FT232
     std::vector<uint8_t> zero;
@@ -144,7 +146,7 @@ int main(int argc, char *argv[]) {
                     {
                         optitrack::RigidBody rigidBody;
                         rigidBody.header.frame_id = "optitrack";
-                        rigidBody.header.stamp = curTimestamp;
+                        rigidBody.header.stamp = frameTimeStamp.at(curPose.frameNum);
                         rigidBody.header.seq = seqs[r];
                         rigidBody.pose.position = point;
                         rigidBody.pose.orientation = quat;
