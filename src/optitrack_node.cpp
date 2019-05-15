@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     ROS_INFO("Number of rigid bodies to track: %d", nbodies);
 
-    string localAddress, serverAddress;
+    string localAddress, serverAddress, usbPort;
     if(!n.getParam("local_address", localAddress)){
         ROS_ERROR("Could not read local_address from parameters");
         ros::shutdown();
@@ -44,6 +44,11 @@ int main(int argc, char *argv[]) {
         ROS_ERROR("Could not read server_address from parameters");
         ros::shutdown();
     }
+    if(!n.getParam("USB_port", usbPort)){
+        ROS_ERROR("Could not read USB_port from parameters");
+        ros::shutdown();
+    }
+
 
     Mocap mocap(localAddress, serverAddress);
 
@@ -59,7 +64,7 @@ int main(int argc, char *argv[]) {
     // SERIAL INIT
     serial::Serial ser;
     try{
-        ser.setPort("/dev/ttyUSB0");
+        ser.setPort(usbPort);
         ser.setBaudrate(115200);
         serial::Timeout to = serial::Timeout::simpleTimeout(3);
         ser.setTimeout(to);
@@ -80,28 +85,32 @@ int main(int argc, char *argv[]) {
     ros::Rate loop_rate(240);
     int count = 0;
     //MAP
-    static constexpr int mapBufferSize = 300;
-    static constexpr int firstGrabbedFrames = 100;
+    static constexpr int mapBufferSize = 300; 		// size of map buffer
+    static constexpr int firstGrabbedFrames = 100; 	// number of frames needed for initialization
     map<int,ros::Time> frameTimeStamp;
-    bool firstFrameFlag=1;
-    int firstFrameId=0;
-    int localFrameId=0;
-    int localCntFrame=1;
-    int firstFramesCounter=0;
-    int firstMinCnt=0;
+
+    int localCntFrame=1; 	// local frameID incremented after each COM send 
+    int firstFrameId=0;  	// lowest frameId grabbed form optitrack
+    int localFrameId=0;  	// frameId saved in map -> localCntFrame+firstFrameId;
+    
+    int firstFramesCounter=0; 	// Counts number of grabbed frames for initialization purpose
+    int firstMinCnt=0;        	// First ever grabbed frame flag
+    bool firstFrameFlag=1; 	// First frame flag. Set to 0 if firstFramesCounter == firstGrabbedFrames. It starts publishing to topics
 
     //FT232
     std::vector<uint8_t> zero;
     zero.push_back(0);
 
     while (ros::ok()) {
+	// Writing frameId to map and sending signal to FT232.
         if(ser.isOpen() && (count %2==0)){
             localFrameId=localCntFrame+firstFrameId;
             frameTimeStamp[localFrameId]=ros::Time::now();
             ser.write(zero);
             localCntFrame++;
         }
-
+	
+	// get optitrack data
         vectorPose poses = mocap.getLatestPoses();
 
         if(firstFrameFlag==0){
@@ -125,7 +134,7 @@ int main(int argc, char *argv[]) {
                     {
                         geometry_msgs::PoseStamped poseStamped;
                         poseStamped.header.frame_id = "optitrack";
-                        poseStamped.header.stamp = curTimestamp;
+                        poseStamped.header.stamp = frameTimeStamp.at(curPose.frameNum);
                         poseStamped.header.seq = seqs[r];
                         poseStamped.pose.position = point;
                         poseStamped.pose.orientation = quat;
@@ -137,7 +146,7 @@ int main(int argc, char *argv[]) {
                     {
                         optitrack::RigidBody rigidBody;
                         rigidBody.header.frame_id = "optitrack";
-                        rigidBody.header.stamp = curTimestamp;
+                        rigidBody.header.stamp = frameTimeStamp.at(curPose.frameNum);
                         rigidBody.header.seq = seqs[r];
                         rigidBody.pose.position = point;
                         rigidBody.pose.orientation = quat;
@@ -156,20 +165,18 @@ int main(int argc, char *argv[]) {
                     }
                     ++seqs[r];
                 }
-                /*while(MapIterator->first < poses[0].frameNum - mapBufferSize ){
-                    MapIterator= frameTimeStamp.erase(MapIterator);
-                }*/
-
+                
+		// remove oldest timestamps
                 while(!frameTimeStamp.empty() && frameTimeStamp.begin()->first < poses[0].frameNum - mapBufferSize ){
                     frameTimeStamp.erase(frameTimeStamp.begin());
                 }
-            }else{
-
             }
 
         }
 
-
+	/* Synchronization with first timestamp. Algorithm wait until number of grabbed frames is larger than firstGrabbedFrames to get the lowest frameID.
+	
+	*/
         if(!poses.empty() && firstFrameFlag && poses[0].frameNum!=-1){
 
             if (firstFramesCounter++ >= firstGrabbedFrames) {
@@ -180,11 +187,10 @@ int main(int argc, char *argv[]) {
                 firstMinCnt++;
                 firstFrameId=poses[0].frameNum;
             }
-
+	
             if(poses[0].frameNum<firstFrameId){
                 firstFrameId=poses[0].frameNum;
             }
-            MapIterator= frameTimeStamp.begin();
             ROS_INFO("ROS:Frame first id: %d",firstFrameId);
         }
 
