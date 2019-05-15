@@ -100,13 +100,15 @@ int main(int argc, char *argv[]) {
     zero.push_back(0);
 
     while (ros::ok()) {
+	// Writing frameId to map and sending signal to FT232.
         if(ser.isOpen() && (count %2==0)){
             localFrameId=localCntFrame+firstFrameId;
             frameTimeStamp[localFrameId]=ros::Time::now();
             ser.write(zero);
             localCntFrame++;
         }
-
+	
+	// get optitrack data
         vectorPose poses = mocap.getLatestPoses();
 
         if(firstFrameFlag==0){
@@ -161,20 +163,18 @@ int main(int argc, char *argv[]) {
                     }
                     ++seqs[r];
                 }
-                /*while(MapIterator->first < poses[0].frameNum - mapBufferSize ){
-                    MapIterator= frameTimeStamp.erase(MapIterator);
-                }*/
-
+                
+		// remove oldest timestamps
                 while(!frameTimeStamp.empty() && frameTimeStamp.begin()->first < poses[0].frameNum - mapBufferSize ){
                     frameTimeStamp.erase(frameTimeStamp.begin());
                 }
-            }else{
-
             }
 
         }
 
-
+	/* Synchronization with first timestamp. Algorithm wait until number of grabbed frames is larger than firstGrabbedFrames to get the lowest frameID.
+	
+	*/
         if(!poses.empty() && firstFrameFlag && poses[0].frameNum!=-1){
 
             if (firstFramesCounter++ >= firstGrabbedFrames) {
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
                 firstMinCnt++;
                 firstFrameId=poses[0].frameNum;
             }
-
+	
             if(poses[0].frameNum<firstFrameId){
                 firstFrameId=poses[0].frameNum;
             }
