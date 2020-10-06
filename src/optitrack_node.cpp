@@ -17,6 +17,8 @@
 #include "Mocap.hpp"
 #include "optitrack/RigidBody.h"
 #include "optitrack/Marker.h"
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
 
 using namespace std;
 
@@ -53,9 +55,11 @@ int main(int argc, char *argv[]) {
         rbDebugPubs.push_back(n.advertise<optitrack::RigidBody>("rigid_body_debug_" + to_string(r), 1000));
         seqs.push_back(0);
     }
-    ros::Rate loop_rate(240);
-    
-    
+    ros::Rate loop_rate(1000);
+
+
+    static tf2_ros::TransformBroadcaster br;
+
     int count = 0;
     while (ros::ok()) {
         vectorPose poses = mocap.getLatestPoses();
@@ -86,6 +90,23 @@ int main(int argc, char *argv[]) {
 //            cout << "publishing for " << r << endl;
 //            cout << "cameraMidExposure timestamp = " << curPose.cameraMidExposureTimestamp << endl;
                 rbPubs[r].publish(poseStamped);
+            }
+            {
+
+                geometry_msgs::TransformStamped transformStamped;
+
+                transformStamped.header.stamp = curTimestamp;
+                transformStamped.header.frame_id = "optitrack";
+                transformStamped.child_frame_id = "opti";
+                transformStamped.transform.translation.x = point.x;
+                transformStamped.transform.translation.y = point.y;
+                transformStamped.transform.translation.z = point.z;
+                transformStamped.transform.rotation.x = quat.x;
+                transformStamped.transform.rotation.y = quat.y;
+                transformStamped.transform.rotation.z = quat.z;
+                transformStamped.transform.rotation.w = quat.w;
+
+                br.sendTransform(transformStamped);
             }
             {
                 optitrack::RigidBody rigidBody;
