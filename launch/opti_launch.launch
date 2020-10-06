@@ -2,7 +2,7 @@
 	<!--<node name = "optitrack_node" type="optitrack" pkg="optitrack" launch-prefix="gdbserver host:2345" output="screen" >-->
 	<node name = "optitrack_node" type="optitrack" pkg="optitrack" output="screen" >
 		<param name="nbodies" value="1" />
-		<param name="local_address" value="192.168.1.159" />
-		<param name="server_address" value="192.168.1.162" />
+		<param name="local_address" value="192.168.0.231" />
+		<param name="server_address" value="192.168.0.162" />
 	</node>
 </launch>
