@@ -69,6 +69,13 @@ struct Pose{
             : id(id), t(t), r(r), timestamp(timestamp), meanError(meanError), markers(markers)
     {}
 
+    void inverse() {
+        Eigen::Matrix3d R = r.toRotationMatrix();
+        R.transposeInPlace();
+        r = Eigen::Quaterniond(R);
+        t = -R * t;
+    }
+
 
     int id;
     

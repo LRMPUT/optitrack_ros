@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         vectorPose poses = mocap.getLatestPoses();
         ros::Time curTimestamp = ros::Time::now();
         
-        for(const Pose &curPose : poses){
+        for(Pose &curPose : poses){
             int r = curPose.id - 1;
             
             geometry_msgs::Point point;
@@ -92,19 +92,20 @@ int main(int argc, char *argv[]) {
                 rbPubs[r].publish(poseStamped);
             }
             {
+                curPose.inverse();
 
                 geometry_msgs::TransformStamped transformStamped;
 
                 transformStamped.header.stamp = curTimestamp;
-                transformStamped.header.frame_id = "optitrack";
-                transformStamped.child_frame_id = "opti";
-                transformStamped.transform.translation.x = point.x;
-                transformStamped.transform.translation.y = point.y;
-                transformStamped.transform.translation.z = point.z;
-                transformStamped.transform.rotation.x = quat.x;
-                transformStamped.transform.rotation.y = quat.y;
-                transformStamped.transform.rotation.z = quat.z;
-                transformStamped.transform.rotation.w = quat.w;
+                transformStamped.header.frame_id = "opti";
+                transformStamped.child_frame_id = "optitrack";
+                transformStamped.transform.translation.x = curPose.t.x();
+                transformStamped.transform.translation.y = curPose.t.y();
+                transformStamped.transform.translation.z = curPose.t.z();
+                transformStamped.transform.rotation.x = curPose.r.x();
+                transformStamped.transform.rotation.y = curPose.r.y();
+                transformStamped.transform.rotation.z = curPose.r.z();
+                transformStamped.transform.rotation.w = curPose.r.w();
 
                 br.sendTransform(transformStamped);
             }
