@@ -110,25 +110,25 @@ int main(int argc, char *argv[]) {
                 br.sendTransform(transformStamped);
             }
             {
-//                optitrack::RigidBody rigidBody;
-//                rigidBody.header.frame_id = "optitrack";
-//                rigidBody.header.stamp = curTimestamp;
-//                rigidBody.header.seq = seqs[r];
-//                rigidBody.pose.position = point;
-//                rigidBody.pose.orientation = quat;
-//                rigidBody.timestamp = curPose.timestamp;
-//                rigidBody.meanError = curPose.meanError;
-//                for(const Marker &marker : curPose.markers){
-//                    optitrack::Marker markerRos;
-//                    markerRos.location.x = marker.location(0);
-//                    markerRos.location.y = marker.location(1);
-//                    markerRos.location.z = marker.location(2);
-//                    markerRos.residual = marker.residual;
-//                    markerRos.occluded = marker.occluded;
-//                    rigidBody.markers.push_back(markerRos);
-//                }
-//
-//                rbDebugPubs[r].publish(rigidBody);
+                optitrack::RigidBody rigidBody;
+                rigidBody.header.frame_id = "optitrack";
+                rigidBody.header.stamp = curTimestamp;
+                rigidBody.header.seq = seqs[r];
+                rigidBody.pose.position = point;
+                rigidBody.pose.orientation = quat;
+                rigidBody.timestamp = curPose.timestamp;
+                rigidBody.meanError = curPose.meanError;
+                for(const Marker &marker : curPose.markers){
+                    optitrack::Marker markerRos;
+                    markerRos.location.x = marker.location(0);
+                    markerRos.location.y = marker.location(1);
+                    markerRos.location.z = marker.location(2);
+                    markerRos.residual = marker.residual;
+                    markerRos.occluded = marker.occluded;
+                    rigidBody.markers.push_back(markerRos);
+                }
+
+                rbDebugPubs[r].publish(rigidBody);
             }
 
             ++seqs[r];
